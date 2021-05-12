@@ -1,63 +1,59 @@
 const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
-
-(async () => {
-const url = 'mongodb+srv://admin:ECnrGWIZ9YBYUHpE@cluster0.zwmgv.mongodb.net/ocean_db?retryWrites=true&w=majority';
-
-const dbName = 'ocean_db';
-
-console.info('Conectando ao banco de dados...');
-
-const client = await MongoClient.connect(url, { useUnifiedTopology: true });
-
-console.info('MongoDB conectado com sucesso!!');
-
-const db = client.db(dbName);
+const {MongoClient, ObjectId} = require('mongodb');
 
 const app = express();
 
+(async () => {
+  const url = 'mongodb+srv://admin:ga4pdERcIqBILbuk@cluster0.xfhit.mongodb.net/ocean_db?retryWrites=true&w=majority ';
+  const dbName = 'ocean_db';
+  console.info('Conectando ao banco de dados...');
+  const client = await MongoClient.connect(url, { useUnifiedTopology: true });
+  console.info('MongoDB conectado com sucesso!!'); 
+  const db = client.db(dbName);
+
+
+
 app.use(express.json());
+ 
+app.get('/hello', (req, res) => {
+    res.send('<h2>Hello World</h2>');
+  });
 
-app.get('/hello', function (req, res) {
-  res.send('Hello World');
-});
-
+const mensagens = ['Essa é a primeira mensagem', 'Segunda mensagem', 'Bom Dia, Luisa!', 'Aula show'];
 const mensagensCollection = db.collection('mensagens');
 
-// CRUD (Create, Read, Update, Delete)
-
-// GET: READ ALL (exibir todos os registros)
+// GET READ ALL
 app.get('/mensagens', async (req, res) => {
-  const listaMensagens = await mensagensCollection.find().toArray();
+    const listaMensagens = await mensagensCollection.find().toArray();
+    res.send(listaMensagens);
+    
+  });
 
-  res.send(listaMensagens);
-});
-
-// GET: READ SINGLE (exibir apenas um registro)
+// GET SINGLE
 app.get('/mensagens/:id', async (req, res) => {
-  const id = req.params.id;
+    const id = req.params.id;
 
-  const mensagem = await mensagensCollection.findOne({ _id: ObjectId(id) });
+    const mensagem = await mensagensCollection.findOne({_id: ObjectId(id)}) ;
 
-  if (!mensagem) {
-    res.send('Mensagem não encontrada.');
+    if (!mensagem) {
+      res.send('mensagem não encontrada');
+    }
 
-    return;
-  }
+    res.send(mensagem);
+  });
 
-  res.send(mensagem);
-});
-
-// POST: CREATE (criar um registro)
+// POST
 app.post('/mensagens', async (req, res) => {
+
   const mensagem = req.body;
 
-  await mensagensCollection.insertOne(mensagem);
+  await mensagensCollection.insertOne(mensagem)
 
   res.send(mensagem);
 });
 
-// PUT: UPDATE (editar um registro)
+// PUT
+
 app.put('/mensagens/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -71,7 +67,8 @@ app.put('/mensagens/:id', async (req, res) => {
   res.send('Mensagem editada com sucesso.');
 });
 
-// DELETE: DELETE (remover um registro)
+
+// DELETE
 app.delete('/mensagens/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -80,6 +77,6 @@ app.delete('/mensagens/:id', async (req, res) => {
   res.send('Mensagem removida com sucesso.');
 });
 
-app.listen(3000);
-
 })();
+ 
+app.listen(process.env.PORT || 3000);
